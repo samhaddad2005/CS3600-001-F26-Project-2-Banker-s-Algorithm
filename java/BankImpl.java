@@ -16,6 +16,13 @@ public class BankImpl implements BankInterface {
 
         // TODO:
         // Initialize numberOfCustomers and numberOfResources.
+        this.numberOfCustomers = numberOfCustomers;
+        this.numberOfResources = resources.length;
+        this.available = resources.clone();
+
+        this.maximum = new int[numberOfCustomers][numberOfResources];
+        this.allocation = new int[numberOfCustomers][numberOfResources];
+        this.need = new int[numberOfCustomers][numberOfResources];
 
         // TODO:
         // Initialize available, maximum,
