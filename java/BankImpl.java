@@ -55,7 +55,7 @@ public class BankImpl implements BankInterface {
         // TODO:
         // Implement the Banker's Safety Algorithm.
 
-        return false;
+        return true;
     }
 
     /**
@@ -67,20 +67,39 @@ public class BankImpl implements BankInterface {
     @Override
     public synchronized boolean requestResources(
             int customerNum, int[] request) {
+        int numberOfResources = available.length;
 
-        // TODO:
-        // 1. Validate the request.
-        // 2. Check whether the request exceeds Need.
-        // 3. Check whether the resources are available.
-        // 4. Check whether the resulting state is safe.
-        // 5. Update the bank if the request is approved.
+        for (int i = 0; i < numberOfResources; i++) {
+            if (request[i] > need[customerNum][i]) {
+                return false; 
+            }
+        }
 
-        return false;
+        for (int i = 0; i < numberOfResources; i++) {
+            if (request[i] > available[i]) {
+                return false; 
+            }
+        }
+
+        for (int i = 0; i < numberOfResources; i++) {
+            available[i] -= request[i];
+            allocation[customerNum][i] += request[i];
+            need[customerNum][i] -= request[i];
+        }
+
+        boolean safe = isSafeState(customerNum, request);
+
+        if (safe) {
+            return true;
+        } else {
+            for (int i = 0; i < numberOfResources; i++) {
+                available[i] += request[i];
+                allocation[customerNum][i] -= request[i];
+                need[customerNum][i] += request[i];
+            }
+            return false; 
+        }
     }
-
-    /**
-     * Releases resources held by a customer.
-     */
     @Override
     public synchronized void releaseResources(
             int customerNum, int[] release) {
