@@ -14,8 +14,6 @@ public class BankImpl implements BankInterface {
      */
     public BankImpl(int numberOfCustomers, int[] resources) {
 
-        // TODO:
-        // Initialize numberOfCustomers and numberOfResources.
         this.numberOfCustomers = numberOfCustomers;
         this.numberOfResources = resources.length;
         this.available = resources.clone();
@@ -24,9 +22,6 @@ public class BankImpl implements BankInterface {
         this.allocation = new int[numberOfCustomers][numberOfResources];
         this.need = new int[numberOfCustomers][numberOfResources];
 
-        // TODO:
-        // Initialize available, maximum,
-        // allocation, and need.
     }
 
     /**
@@ -36,7 +31,11 @@ public class BankImpl implements BankInterface {
     @Override
     public void addCustomer(int customerNum, int[] maxDemand) {
 
-        // TODO
+        for (int i = 0; i < numberOfResources; i++) {
+            maximum[customerNum][i] = maxDemand[i];
+            allocation[customerNum][i] = 0;
+            need[customerNum][i] = maxDemand[i];
+        }
     }
 
     /**
@@ -78,13 +77,13 @@ public class BankImpl implements BankInterface {
 
         for (int i = 0; i < numberOfResources; i++) {
             if (request[i] > need[customerNum][i]) {
-                return false; 
+                return false;
             }
         }
 
         for (int i = 0; i < numberOfResources; i++) {
             if (request[i] > available[i]) {
-                return false; 
+                return false;
             }
         }
 
@@ -104,14 +103,40 @@ public class BankImpl implements BankInterface {
                 allocation[customerNum][i] -= request[i];
                 need[customerNum][i] += request[i];
             }
-            return false; 
+            return false;
         }
     }
+
     @Override
     public synchronized void releaseResources(
             int customerNum, int[] release) {
 
-        // TODO:
-        // Validate and release the resources.
+        // Validate customer number
+        if (customerNum < 0 || customerNum >= numberOfCustomers) {
+            System.out.println("Release Denied: invalid customer");
+            return;
+        }
+        // Validate number of resource values
+        if (release == null || release.length != numberOfResources) {
+            System.out.println("Release Denied: invalid resource count");
+            return;
+        }
+        // Validate the entire release before modifying the banks state
+        for (int i = 0; i < numberOfResources; i++) {
+            if (release[i] < 0) {
+                System.out.println("Release Denied: negative resource value");
+                return;
+            }
+            if (release[i] > allocation[customerNum][i]) {
+                System.out.println("Release Denied: releasing more than allocated");
+                return;
+            }
+        }
+        // Applying the valid release
+        for (int i = 0; i < numberOfResources; i++) {
+            available[i] += release[i];
+            allocation[customerNum][i] -= release[i];
+            need[customerNum][i] += release[i];
+        }
     }
 }
