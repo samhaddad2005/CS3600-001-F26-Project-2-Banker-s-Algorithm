@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class BankImpl implements BankInterface {
 
     private int numberOfCustomers;
@@ -49,7 +51,21 @@ public class BankImpl implements BankInterface {
     @Override
     public void getState() {
 
-        // TODO
+        System.out.println("Available:");
+        System.out.println(Arrays.toString(available));
+        System.out.println();
+
+        // Print each matrix with one row per customer
+        String[] labels = {"Maximum:", "Allocation:", "Need:"};
+        int[][][] matrices = {maximum, allocation, need};
+
+        for (int m = 0; m < matrices.length; m++) {
+            System.out.println(labels[m]);
+            for (int i = 0; i < numberOfCustomers; i++) {
+                System.out.println("Customer " + i + ": " + Arrays.toString(matrices[m][i]));
+            }
+            System.out.println();
+        }
     }
 
     /**
@@ -58,10 +74,42 @@ public class BankImpl implements BankInterface {
      */
     private boolean isSafeState(int customerNum, int[] request) {
 
-        // TODO:
-        // Implement the Banker's Safety Algorithm.
+        // requestResources applies the request before calling this method,
+        // so available, allocation, and need already include it.
 
-        return true;
+        int[] work = available.clone();
+        boolean[] finish = new boolean[numberOfCustomers];
+        int finishedCount = 0;
+
+        boolean progress = true;
+        while (progress) {
+            progress = false;
+
+            for (int i = 0; i < numberOfCustomers; i++) {
+                if (finish[i]) {
+                    continue;
+                }
+
+                boolean canFinish = true;
+                for (int j = 0; j < numberOfResources; j++) {
+                    if (need[i][j] > work[j]) {
+                        canFinish = false;
+                        break;
+                    }
+                }
+
+                if (canFinish) {
+                    for (int j = 0; j < numberOfResources; j++) {
+                        work[j] += allocation[i][j];
+                    }
+                    finish[i] = true;
+                    finishedCount++;
+                    progress = true;
+                }
+            }
+        }
+
+        return finishedCount == numberOfCustomers;
     }
 
     /**
